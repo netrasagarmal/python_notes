@@ -399,3 +399,168 @@ class MyCustomError(Exception):
 
 ---
 
+## In-depth working of exception handling:
+
+**Raise an Exception inside a `try` block** and **handle it in the `except` block**.
+
+---
+
+### ✅ Example:
+
+```python
+try:
+    print("Trying to do something risky...")
+    raise ValueError("Something went wrong!")  # Manually raise an exception
+except ValueError as e:
+    print(f"Caught an exception: {e}")
+```
+
+---
+
+### 🔍 Output:
+
+```
+Trying to do something risky...
+Caught an exception: Something went wrong!
+```
+
+---
+
+### 🧠 Explanation:
+
+* `raise ValueError("Something went wrong!")`: You **manually trigger** a `ValueError`.
+* Python immediately jumps to the `except ValueError as e:` block.
+* `e` holds the actual exception object (`ValueError("Something went wrong!")`), and you can print it or log it.
+
+---
+
+### ✅ Try It Yourself:
+
+You can replace `ValueError` with other types of exceptions, like `TypeError`, `RuntimeError`, or even a **custom exception** like this:
+
+```python
+class MyCustomError(Exception):
+    pass
+
+try:
+    raise MyCustomError("This is a custom error")
+except MyCustomError as e:
+    print(f"Caught custom error: {e}")
+```
+
+## Let’s walk through this line by line and understand **how the message** `"This is a custom error"` is printed — including how **exception classes** work in Python and what gets inherited under the hood.`
+
+---
+
+### ✅ Code:
+
+```python
+class MyCustomError(Exception):
+    pass
+
+try:
+    raise MyCustomError("This is a custom error")
+except MyCustomError as e:
+    print(f"Caught custom error: {e}")
+```
+
+---
+
+### 🔍 Output:
+
+```
+Caught custom error: This is a custom error
+```
+
+---
+
+## ✅ STEP-BY-STEP EXECUTION
+
+---
+
+### 1. `class MyCustomError(Exception):`
+
+* You are **defining a custom exception class**.
+* It **inherits** from Python’s built-in `Exception` class.
+* The `Exception` class is part of Python’s exception hierarchy and provides all the base functionality like holding a message and traceback.
+
+---
+
+### 2. `raise MyCustomError("This is a custom error")`
+
+* This line **raises** an instance of `MyCustomError` with the message `"This is a custom error"`.
+
+* Internally, this is like calling:
+
+  ```python
+  e = MyCustomError("This is a custom error")
+  raise e
+  ```
+
+* Because `MyCustomError` inherits from `Exception`, it accepts a message in its constructor via `__init__` and stores it.
+
+---
+
+### 3. `except MyCustomError as e:`
+
+* Python matches the raised exception type (`MyCustomError`) to this handler.
+* The raised exception object is assigned to variable `e`.
+
+---
+
+### 4. `print(f"Caught custom error: {e}")`
+
+* This prints the exception object.
+* So what does `str(e)` do?
+
+---
+
+## 🔍 How `"This is a custom error"` gets printed
+
+### Internally:
+
+When you do:
+
+```python
+str(e)
+```
+
+You're calling:
+
+```python
+e.__str__()
+```
+
+Now since you **did not override `__str__` in `MyCustomError`**, Python uses the `__str__` method from the base class `Exception`.
+
+### Python’s `Exception` class:
+
+```python
+class Exception(BaseException):
+    def __init__(self, *args):
+        self.args = args
+
+    def __str__(self):
+        if len(self.args) == 1:
+            return str(self.args[0])
+        return str(self.args)
+```
+
+So:
+
+* `self.args` becomes `("This is a custom error",)`
+* `str(self.args[0])` → `"This is a custom error"`
+* Hence `print(e)` prints: `"This is a custom error"`
+
+---
+
+## ✅ Summary
+
+| Part                             | What it does                                 |
+| -------------------------------- | -------------------------------------------- |
+| `class MyCustomError(Exception)` | Inherits base exception behavior             |
+| `raise MyCustomError("...")`     | Creates and raises an exception instance     |
+| `except MyCustomError as e`      | Catches the raised custom exception          |
+| `print(e)` or `str(e)`           | Calls `Exception.__str__()`, returns message |
+
+---
